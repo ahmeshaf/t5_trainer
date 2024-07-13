@@ -317,11 +317,11 @@ def trainer_seq2seq_multi(
 
 @app.command()
 def train(
-    config_file: Path,
     dataset_names: List[str],
+    config_file: str = "config.json",
     is_peft: bool = False,
     debug: bool = False,
-    check_pt: str: None,
+    check_pt: str = None,
     kv: str = Option(
         None,
         "--kv",
