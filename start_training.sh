@@ -27,4 +27,4 @@ full_check_pt_dir="$output_dir$check_pt"
 
 echo "using checkpoint: $full_check_pt_dir"
 
-python trainer.py events-synergy/entsum_processed --check-pt "$full_check_pt_dir" --kv "model_name_or_path=$full_check_pt_dir" > "continue_training.txt" &
+python trainer.py events-synergy/entsum_processed --config-file config.json --check-pt "$full_check_pt_dir" --kv "model_name_or_path=$full_check_pt_dir" > "continue_training.txt" &
