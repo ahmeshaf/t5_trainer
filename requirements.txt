@@ -1,0 +1,13 @@
+jinja2
+pytest
+transformers
+datasets
+evaluate
+tqdm
+typer
+rouge_score
+absl-py
+accelerate
+sentencepiece
+peft
+git+https://github.com/ns-moosavi/coval
