@@ -27,6 +27,7 @@ source "$py_env/bin/activate"
 d=$(date '+DATE- %m-%d-%y TIME-%H:%M:%S')
 echo "$d"
 
+# identify the latest checkpoint
 output_dir=$(jq -r '.trainer.output_dir' "$repo/config.json") && check_pt=$(ls -t "$output_dir" | head -n 1)
 full_check_pt_dir="$output_dir$check_pt"
 
