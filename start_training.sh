@@ -9,7 +9,7 @@ py_env="$workspace/my_py"
 # Check if the directory /workspace/t5_trainer exists
 if [ ! -d "$repo" ]; then
   echo "Cloning code"
-  # If the directory does not exist, clone the repository and install requirements
+  # If the directory does not exist, clone the repository and install the requirements
   git clone https://github.com/ahmeshaf/t5_trainer.git "$repo"
 fi
 
@@ -32,4 +32,7 @@ full_check_pt_dir="$output_dir$check_pt"
 
 echo "using checkpoint: $full_check_pt_dir"
 
-python trainer.py events-synergy/entsum_processed --config-file "$repo/config.json" --check-pt "$full_check_pt_dir" --kv "model_name_or_path=$full_check_pt_dir" > "$workspace/continue_training.txt" &
+python trainer.py events-synergy/entsum_processed \
+                  --config-file "$repo/config.json" \
+                  --check-pt "$full_check_pt_dir" \
+                  --kv "model_name_or_path=$full_check_pt_dir"
