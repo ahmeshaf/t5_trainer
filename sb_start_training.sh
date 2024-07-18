@@ -28,7 +28,7 @@ FULL_CHECK_PT_DIR="$OUTPUT_DIR$check_pt"
 if [ -z "$check_pt" ]; then 
   echo "No checkpoint. Running from scratch!" ;
   python trainer.py "$CONFIG_FILE" \
-                    --model-name-or-path "$FULL_CHECK_PT_DIR" \
+                    --model-name-or-path "$BASE_MODEL" \
                     --output-dir "$OUTPUT_DIR"
                     --run-name "$RUN_NAME"
 else 
