@@ -205,7 +205,7 @@ def trainer_seq2seq_multi(
     """
     config = json.load(open(config_file))
 
-    dataset_names = list(config["dataset_names"])
+    dataset_names = list(config["datasets"])
     # Dictionary of Dictionaries of datasets. Outer Dict = task, Inner Dict = split
     dataset_dict = {}
     for ds_name in dataset_names:
