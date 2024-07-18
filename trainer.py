@@ -191,7 +191,6 @@ def update_config_dict(config, kwargs):
 
 def trainer_seq2seq_multi(
     config_file: Path,
-    datasets_dict: Dict[str, Dict[str, Dataset]],
     debug: bool = False,
     is_peft: bool = False,
     check_pt: str = None,
@@ -200,17 +199,19 @@ def trainer_seq2seq_multi(
     """
 
     :param config_file:
-    :param datasets_dict: Dictionary of Dictionaries of datasets. Outer Dict = task, Inner Dict = split
     :param debug: If True, only train on a small subset of the data
     :param kwargs: additional arguments to update config_file dictionary
     :return:
     """
     config = json.load(open(config_file))
 
+    dataset_names = list(config["dataset_names"])
+    # Dictionary of Dictionaries of datasets. Outer Dict = task, Inner Dict = split
+    dataset_dict = {}
+    for ds_name in dataset_names:
+        dataset_dict[ds_name] = load_dataset(ds_name)
+    
     update_config_dict(config, kwargs)
-
-    # print(dataset_names)
-    # datasets_dict = {d_name: load_dataset(d_name) for d_name in dataset_names}
 
     model_name_or_path = config.pop("model_name_or_path")
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
@@ -317,8 +318,10 @@ def trainer_seq2seq_multi(
 
 @app.command()
 def train(
-    dataset_names: List[str],
-    config_file: str = "config.json",
+    config_file: str,
+    model_name_or_path: str = None,
+    output_dir: str = None,
+    run_name: str = None,
     is_peft: bool = False,
     debug: bool = False,
     check_pt: str = None,
@@ -341,12 +344,7 @@ def train(
     :param kv: override config file parameters with this. e.g., "num_train_epochs=20,per_device_train_batch_size=8"
     :return:
     """
-    dataset_names = list(set(dataset_names))
-    dataset_dict = {}
-
-    for ds_name in dataset_names:
-        dataset_dict[ds_name] = load_dataset(ds_name)
-
+    
     kv_dict = {}
 
     if kv:
@@ -360,7 +358,19 @@ def train(
     else:
         echo("No key-value arguments provided.")
 
-    trainer_seq2seq_multi(config_file, dataset_dict, debug, is_peft, check_pt, **kv_dict)
+    if model_name_or_path:
+        echo(f"model_name_or_path: {model_name_or_path}")
+        kv_dict["model_name_or_path"] = model_name_or_path
+
+    if output_dir:
+        echo(f"output_dir: {output_dir}")
+        kv_dict["output_dir"] = output_dir
+
+    if run_name:
+        echo(f"run_name: {run_name}")
+        kv_dict["run_name"] = run_name
+    
+    trainer_seq2seq_multi(config_file, debug, is_peft, check_pt, **kv_dict)
 
 
 if __name__ == "__main__":
