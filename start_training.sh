@@ -19,7 +19,7 @@ if [ ! -d "$py_env" ]; then
   # if not, create a new environment and install requirements
   python3 -m venv "$py_env"
   source "$py_env/bin/activate"
-  pip install -r --no-cache-dir "$repo/requirements.txt"
+  pip install --cache-dir "$1/.pip/" -r "$repo/requirements.txt"
 fi
 
 source "$py_env/bin/activate"
@@ -31,8 +31,9 @@ echo "$d"
 output_dir=$(jq -r '.trainer.output_dir' "$repo/config.json") && check_pt=$(ls -t "$output_dir" | head -n 1)
 full_check_pt_dir="$output_dir$check_pt"
 
+# If no checkpoint, start from scratch, else continue from chkpt
 if [ -z "$check_pt" ]; then 
-  echo "No check point. Running from scratch!" && python "$repo/trainer.py" events-synergy/entsum_processed --config-file "$repo/config.json" 
+  echo "No checkpoint. Running from scratch!" && python "$repo/trainer.py" events-synergy/entsum_processed --config-file "$repo/config.json" 
 else 
   echo "Using checkpoint: $full_check_pt_dir" && python "$repo/trainer.py" events-synergy/entsum_processed --config-file "$repo/config.json" --check-pt "$full_check_pt_dir" --kv "model_name_or_path=$full_check_pt_dir"
 fi
