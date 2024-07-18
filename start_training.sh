@@ -31,9 +31,8 @@ echo "$d"
 output_dir=$(jq -r '.trainer.output_dir' "$repo/config.json") && check_pt=$(ls -t "$output_dir" | head -n 1)
 full_check_pt_dir="$output_dir$check_pt"
 
-echo "using checkpoint: $full_check_pt_dir"
-
-python trainer.py events-synergy/entsum_processed \
-                  --config-file "$repo/config.json" \
-                  --check-pt "$full_check_pt_dir" \
-                  --kv "model_name_or_path=$full_check_pt_dir"
+if [ -z "$check_pt" ]; then 
+  echo "No check point. Running from scratch!" && python "$repo/trainer.py" events-synergy/entsum_processed --config-file "$repo/config.json" 
+else 
+  echo "Using checkpoint: $full_check_pt_dir" && python "$repo/trainer.py" events-synergy/entsum_processed --config-file "$repo/config.json" --check-pt "$full_check_pt_dir" --kv "model_name_or_path=$full_check_pt_dir"
+fi
