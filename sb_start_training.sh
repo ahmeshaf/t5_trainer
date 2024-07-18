@@ -27,13 +27,13 @@ FULL_CHECK_PT_DIR="$OUTPUT_DIR$check_pt"
 # If no checkpoint, start from scratch, else continue from chkpt
 if [ -z "$check_pt" ]; then 
   echo "No checkpoint. Running from scratch!" ;
-  python trainer.py --config-file "$CONFIG_FILE" \
+  python trainer.py "$CONFIG_FILE" \
                     --model_name_or_path "$FULL_CHECK_PT_DIR" \
                     --output_dir "$OUTPUT_DIR"
                     --run_name "$RUN_NAME"
 else 
   echo "Using checkpoint: $full_check_pt_dir";
-  python trainer.py --config-file "$CONFIG_FILE" \
+  python trainer.py "$CONFIG_FILE" \
                     --model_name_or_path "$FULL_CHECK_PT_DIR" \
                     --output_dir "$OUTPUT_DIR" \
                     --run_name "$RUN_NAME" \
