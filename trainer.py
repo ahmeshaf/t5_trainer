@@ -338,7 +338,6 @@ def train(
             "response": ARG-0: [arg0] | ARG-1: [arg1] | ... | ARG-N: [argn]
         }
     :param config_file:
-    :param dataset_names:
     :param is_peft: If True, use PEFT for training
     :param debug: If True, only train on a small subset of the data
     :param kv: override config file parameters with this. e.g., "num_train_epochs=20,per_device_train_batch_size=8"
