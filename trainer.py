@@ -207,9 +207,9 @@ def trainer_seq2seq_multi(
 
     dataset_names = list(config["datasets"])
     # Dictionary of Dictionaries of datasets. Outer Dict = task, Inner Dict = split
-    dataset_dict = {}
+    datasets_dict = {}
     for ds_name in dataset_names:
-        dataset_dict[ds_name] = load_dataset(ds_name)
+        datasets_dict[ds_name] = load_dataset(ds_name)
     
     update_config_dict(config, kwargs)
 
