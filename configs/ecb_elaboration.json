@@ -1,0 +1,39 @@
+{
+    "model_name_or_path": "google/flan-t5-xl",
+    "datasets": ["events-synergy/ecb_plus_elaboration"],
+    "max_input_length": 1024,
+    "trainer": {
+        "output_dir": "/workspace/models/ecb_elaboration_xl/",
+        "num_train_epochs": 20,
+        "per_device_train_batch_size": 5,
+        "per_device_eval_batch_size": 5,
+        "warmup_steps": 100,
+        "weight_decay": 0.01,
+        "logging_steps": 100,
+        "eval_strategy": "steps",
+        "save_strategy": "steps",
+        "eval_steps": 600,
+        "save_steps": 600, 
+        "predict_with_generate": true,
+        "learning_rate": 5e-5,
+        "save_total_limit": 1,
+        "seed": 42,
+        "run_name": "flan-t5-xl-ds-elaboration",
+        "prediction_loss_only": true,
+        "load_best_model_at_end": true,
+        "ddp_find_unused_parameters": false,
+        "bf16": true,
+        "push_to_hub": true,
+        "hub_model_id": "events-synergy/flan-t5-xl-ecb-elaboration",
+        "hub_private_repo": true,
+        "hub_strategy": "checkpoint"
+    },
+    "generation": {
+        "max_new_tokens": 256,
+        "early_stopping": true,
+        "min_new_tokens": 2,
+        "num_beams": 2,
+        "max_length": 1024
+    },
+    "optimizer": {"lr": 5e-5, "eps": 1e-8}
+}
