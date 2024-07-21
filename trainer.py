@@ -105,13 +105,13 @@ class MultiEvalTrainer(Seq2SeqTrainer):
                 super(MultiEvalTrainer, self).evaluate(
                     eval_dataset=eval_dataset,
                     ignore_keys=ignore_keys,
-                    metric_key_prefix=f"eval_{dataset_name}",
+                    metric_key_prefix=f"eval",
                 )
             )
 
         eval_loss_keys = [key for key in eval_scores if key.endswith("loss")] 
         eval_loss = sum([eval_scores[key] for key in eval_loss_keys])
-        eval_scores[f"{metric_key_prefix}_loss"] = eval_loss
+        eval_scores[f"eval_loss"] = eval_loss
 
         return eval_scores
 
