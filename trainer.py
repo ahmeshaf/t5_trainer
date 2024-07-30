@@ -58,7 +58,13 @@ def get_prf(gold_tags: list, predicted_tags: list):
 
 def pre_process_eos(dataset, eos_token):
     prompts = [doc for doc in dataset["prompt"]]
-    responses = [(doc + " " + eos_token).strip() for doc in dataset["response"]]
+    responses = []
+    for doc in dataset["response"]:
+        # check if doc is None
+        if doc is None:
+            responses.append("<unk> " + eos_token)
+        else:
+            responses.append(doc + " " + eos_token)
     new_dataset = Dataset.from_dict({"prompt": prompts, "response": responses})
     return new_dataset
 
@@ -71,7 +77,7 @@ class MultiEvalTrainer(Seq2SeqTrainer):
         **kwargs,
     ):
         self.eval_datasets = eval_datasets
-        self.rouge = load("rouge")
+        # self.rouge = load("rouge")
         self.eval_is_rouge = dataset2_is_rouge
 
         super().__init__(
@@ -193,6 +199,7 @@ def trainer_seq2seq_multi(
     config_file: Path,
     debug: bool = False,
     is_peft: bool = False,
+    continue_training: bool = False,
     check_pt: str = None,
     **kwargs,
 ):
@@ -200,6 +207,8 @@ def trainer_seq2seq_multi(
 
     :param config_file:
     :param debug: If True, only train on a small subset of the data
+    :param is_peft: If True, use PEFT for training
+    :param continue_training: If True, continue training from a checkpoint
     :param kwargs: additional arguments to update config_file dictionary
     :return:
     """
@@ -212,6 +221,25 @@ def trainer_seq2seq_multi(
         datasets_dict[ds_name] = load_dataset(ds_name)
     
     update_config_dict(config, kwargs)
+
+    output_dir = config["trainer"]["output_dir"]
+
+    if continue_training:
+        if check_pt:
+            check_pt = check_pt
+        else:
+            # check for directories of the form, output_dir/checkpoint-<int>
+            check_pts = list(Path(output_dir).glob("checkpoint-*"))
+            if check_pts:
+                # sort checkpoint by the number after the hyphen
+                check_pts = sorted(check_pts, key=lambda x: int(x.stem.split("-")[1]))\
+                # find a valid checkpoint directory to continue training from. Start from the most recent
+                for check_pt_dir in reversed(check_pts):
+                    if (check_pt_dir / "trainer_state.json").exists():
+                        check_pt = str(check_pt_dir)
+                        print(f"Found valid checkpoint at {check_pt}")
+                        break
+
 
     model_name_or_path = config.pop("model_name_or_path")
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
@@ -242,7 +270,8 @@ def trainer_seq2seq_multi(
         eval_datasets = {k: Dataset.from_dict(v[:100]) for k, v in eval_datasets.items()}
         config["trainer"]["logging_steps"] = 10
         config["trainer"]["warmup_steps"] = 5
-        config["trainer"]["eval_steps"] = 50
+        config["trainer"]["eval_steps"] = 20
+        config["trainer"]["save_steps"] = 20
 
 
     def preprocess_data(examples):
@@ -324,6 +353,7 @@ def train(
     run_name: str = None,
     is_peft: bool = False,
     debug: bool = False,
+    continue_training: bool = False,
     check_pt: str = None,
     kv: str = Option(
         None,
@@ -341,6 +371,9 @@ def train(
     :param is_peft: If True, use PEFT for training
     :param debug: If True, only train on a small subset of the data
     :param kv: override config file parameters with this. e.g., "num_train_epochs=20,per_device_train_batch_size=8"
+    :param continue_training: If True, continue training from a checkpoint
+    :param check_pt: path to checkpoint to continue training from. If None, and continue_training is True, will look for a checkpoint in output_dir
+
     :return:
     """
     
@@ -369,7 +402,7 @@ def train(
         echo(f"run_name: {run_name}")
         kv_dict["run_name"] = run_name
     
-    trainer_seq2seq_multi(config_file, debug, is_peft, check_pt, **kv_dict)
+    trainer_seq2seq_multi(config_file, debug, is_peft, continue_training, check_pt, **kv_dict)
 
 
 if __name__ == "__main__":

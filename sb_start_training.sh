@@ -1,41 +1,30 @@
-#!/bin/bash
-
-PY_ENV=$1
-CONFIG_FILE=$2
-BASE_MODEL=$3
-RUN_NAME=$4
-
-OUTPUT_DIR="/scratch/local/models/$RUN_NAME/"
+#!/bin/sh
 
 #SBATCH --account=blanca-clearlab1
 #SBATCH --partition=blanca-clearlab1
 #SBATCH --qos=blanca-clearlab1
-#SBATCH --job-name=nvidia-check
-#SBATCH --gres=gpu:3
+#SBATCH --job-name=t5_training
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=16
 #SBATCH --output=t5_training.%j.out
 
-source "$PY_ENV/bin/activate"
+# Load modules
+echo "Loading modules..."
+module load python
 
-d=$(date '+DATE- %m-%d-%y TIME-%H:%M:%S')
-echo "$d"
+export TOKENIZERS_PARALLELISM=false
 
-# identify the latest checkpoint
-check_pt=$(ls -t "$OUTPUT_DIR" | head -n 1)
-FULL_CHECK_PT_DIR="$OUTPUT_DIR$check_pt"
+# echo HF_HOME
+echo "HF_HOME: $HF_HOME"
 
-# If no checkpoint, start from scratch, else continue from chkpt
-if [ -z "$check_pt" ]; then 
-  echo "No checkpoint. Running from scratch!" ;
-  python trainer.py "$CONFIG_FILE" \
-                    --model-name-or-path "$BASE_MODEL" \
-                    --output-dir "$OUTPUT_DIR"
-                    --run-name "$RUN_NAME"
-else 
-  echo "Using checkpoint: $full_check_pt_dir";
-  python trainer.py "$CONFIG_FILE" \
-                    --model-name-or-path "$FULL_CHECK_PT_DIR" \
-                    --output-dir "$OUTPUT_DIR" \
-                    --run-name "$RUN_NAME" \
-                    --check-pt "$FULL_CHECK_PT_DIR"
-fi
+# Activate conda environment
+echo "Activating conda environment at $SCRATCHDIR/$USER/venv/"
+source activate "$SCRATCHDIR/$USER/venv/bin/activate"
+
+OUTPUT_DIR="$SCRATCHDIR/$USER/models/srl-xl-conll05"
+
+# Start training
+echo "Starting training..."
+python trainer.py configs/srl_conll05.json \
+                  --output-dir "$OUTPUT_DIR" \
+                  --continue-training
